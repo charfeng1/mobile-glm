@@ -6,8 +6,8 @@ struct ContentView: View {
     @StateObject private var phoneDisplay = PhoneDisplayViewModel()
 
     // Persisted settings using AppStorage (saved automatically after first edit)
-    // Default IP is for development - users will change on first use and it persists
-    @AppStorage("serverHost") private var serverHost = "192.168.71.13"
+    // Default IP is placeholder - users should enter their computer's IP on first use
+    @AppStorage("serverHost") private var serverHost = "192.168.1.100"
     @AppStorage("serverPort") private var serverPort = "8765"
 
     @State private var showingSettings = false

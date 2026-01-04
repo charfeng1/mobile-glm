@@ -19,8 +19,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Cloned dependency repos (clone separately, see README)
-Open-AutoGLM/
+# No external dependencies needed - using autoglm_client.py
 
 # Xcode
 *.xcuserdatad/

@@ -14,16 +14,12 @@ import base64
 import hashlib
 import json
 import os
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 from dataclasses import dataclass, field
 
-# Add Open-AutoGLM to path
-AUTOGLM_PATH = Path(__file__).parent / "Open-AutoGLM"
-sys.path.insert(0, str(AUTOGLM_PATH))
-
+# Import Open-AutoGLM (installed via pip from git)
 from phone_agent.model import ModelConfig
 from phone_agent.model.client import ModelClient, MessageBuilder
 from phone_agent.actions.handler import ActionHandler, parse_action
@@ -188,7 +184,7 @@ class PhoneTaskResult:
 class PhoneExecutor:
     """Executes phone tasks using AutoGLM."""
 
-    DEVICE_ID = "29221FDA300GKM"
+    DEVICE_ID = os.getenv("PHONE_DEVICE_ID", "")  # Set via environment variable
 
     def __init__(self, api_key: str | None = None):
         self.api_key = api_key or self._load_api_key()
@@ -203,13 +199,13 @@ class PhoneExecutor:
 
     def _load_api_key(self) -> str | None:
         """Load API key from .env file or environment."""
-        # Check project .env first, then Open-AutoGLM .env
-        for env_path in [Path(__file__).parent / ".env", AUTOGLM_PATH / ".env"]:
-            if env_path.exists():
-                with open(env_path) as f:
-                    for line in f:
-                        if line.startswith("ZHIPU_API_KEY="):
-                            return line.split("=", 1)[1].strip()
+        # Check project .env
+        env_path = Path(__file__).parent / ".env"
+        if env_path.exists():
+            with open(env_path) as f:
+                for line in f:
+                    if line.startswith("ZHIPU_API_KEY="):
+                        return line.split("=", 1)[1].strip()
         return os.getenv("ZHIPU_API_KEY")
 
     def _create_client(self) -> ModelClient:

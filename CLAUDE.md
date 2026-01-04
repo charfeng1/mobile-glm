@@ -92,6 +92,5 @@ mobile-glm/
 ├── phone_tool.py         # AutoGLM execution layer
 ├── preference_tool.py    # User preference tool
 ├── scrcpy_ws_bridge.py   # WebSocket H.264 bridge
-├── MobileGLM-iOS/        # iOS native app
-└── Open-AutoGLM/         # AutoGLM SDK (clone separately)
+└── MobileGLM-iOS/        # iOS native app
 ```

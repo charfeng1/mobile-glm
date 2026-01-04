@@ -1,149 +1,194 @@
-# MobileGLM - Phone Automation System
+# MobileGLM - AI-Powered Phone Automation
 
-AI-powered phone automation using Claude Agent SDK + AutoGLM-Phone-9B.
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](#english)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](#中文)
 
-## Features
+---
 
-- **iOS Remote Control** - Stream Android screen to iOS device (~50-80ms latency)
-- **Intelligent Orchestration** - Claude Agent SDK for task planning and tool calling
-- **Stuck Detection** - 7 heuristic detectors + automatic recovery
-- **User Preferences** - Remember user preferences for personalized execution
+<a name="english"></a>
 
-## Quick Start
+## English
 
-### 1. Clone Repository
+AI-powered Android phone automation using **Claude Agent SDK** + **AutoGLM-Phone-9B**.
+
+Control your Android phone with natural language commands through an intelligent multi-agent system.
+
+### Features
+
+- **Natural Language Control** - "Open Taobao and search for headphones" → Agent handles it
+- **Claude Orchestration** - Task planning, decomposition, and error recovery
+- **AutoGLM-Phone-9B** - Zhipu's vision model for phone UI understanding
+- **Stuck Detection** - 7 heuristics automatically identify and recover from failures
+- **User Preferences** - Learns your preferences for personalized automation
+- **iOS Remote Viewer** (Optional) - Stream Android screen with ~50-80ms latency
+
+### Quick Start
+
+**Prerequisites:**
+- Python 3.11+
+- Android device with USB debugging
+- [Zhipu API key](https://open.bigmodel.cn/) (AutoGLM)
+- [Anthropic API key](https://console.anthropic.com/) (Claude)
+
+**Installation:**
 
 ```bash
-git clone https://github.com/user/mobile-glm.git
+git clone https://github.com/YOUR-USERNAME/mobile-glm.git
 cd mobile-glm
-
-# Clone dependency
-git clone https://github.com/AdarshHH/Open-AutoGLM.git
+uv sync  # Auto-installs Open-AutoGLM from GitHub
 ```
 
-### 2. Install Dependencies
-
-```bash
-# Using uv (recommended)
-uv sync
-
-# Or using pip
-pip install -e .
-```
-
-### 3. Configure Environment
+**Configure:**
 
 ```bash
 cp .env.example .env
-# Edit .env with your API keys:
-# - ZHIPU_API_KEY (required for AutoGLM)
-# - ANTHROPIC_API_KEY (required for Claude Agent SDK)
+# Edit .env with your API keys
 ```
 
-### 4. Download scrcpy-server
+**Run:**
 
 ```bash
-# Download scrcpy-server.jar from scrcpy releases
-# https://github.com/Genymobile/scrcpy/releases
-# Place in project root
-```
-
-### 5. Connect Android Device
-
-```bash
-adb devices  # Verify device is connected
-```
-
-### 6. Run
-
-```bash
-# Run Agent (interactive CLI)
+adb devices  # Connect Android device
 uv run python agent_sdk.py
-
-# Run WebSocket bridge (for iOS app)
-uv run python scrcpy_ws_bridge.py
 ```
 
-## iOS Remote Control App
+**Example commands:**
+- "Open Settings"
+- "Search for restaurants on Meituan"
+- "Turn on airplane mode"
 
-### Start Bridge Service
+### Architecture
 
-```bash
-# 1. Connect Android phone
-adb devices
-
-# 2. Start WebSocket bridge
-uv run python scrcpy_ws_bridge.py
-# Server runs on ws://0.0.0.0:8765
+```
+Natural Language → Claude SDK → phone_tool → AutoGLM API → Android (ADB)
 ```
 
-### Build iOS App
+**Claude Agent SDK** plans tasks and orchestrates
+**phone_tool.py** manages execution with safety checks
+**AutoGLM-Phone-9B** analyzes screenshots and executes UI actions
+
+### iOS Remote Viewer (Optional)
+
+Stream Android screen to iOS device:
 
 ```bash
-# Open project in Xcode
+# 1. Download scrcpy-server.jar to project root
+# 2. Start bridge
+uv run python scrcpy_ws_bridge.py
+
+# 3. Build iOS app
 open MobileGLM-iOS/MobileGLM.xcodeproj
-
-# Run on device/simulator
-# Enter the IP address of the computer running the bridge
 ```
 
-### Bridge Protocol
+### API Example
 
-**Video**: Binary H.264 NAL units (each WebSocket message = one complete NAL)
+```python
+from agent_sdk import TelemetryAgentSDK
 
-**Control Commands** (JSON):
-```json
-{"type": "touch", "action": "down|up|move", "x": 0.5, "y": 0.5}
-{"type": "home"}
-{"type": "back"}
-{"type": "recents"}
+agent = TelemetryAgentSDK()
+result = agent.invoke("Open Settings and enable airplane mode")
+print(result['final_response'])
 ```
 
-## Architecture
-
-```
-User Command
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ Claude Agent SDK                    │
-│ - Task understanding & decomposition│
-│ - Tool calling (phone_task, etc.)   │
-│ - Stuck recovery & retry            │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ phone_tool.py                       │
-│ - Step limits (max_steps)           │
-│ - Action/app allowlists             │
-│ - 7 stuck detectors                 │
-└─────────────────────────────────────┘
-    │
-    ▼
-┌─────────────────────────────────────┐
-│ AutoGLM-Phone-9B (via Open-AutoGLM) │
-│ - Screenshot analysis               │
-│ - UI element recognition            │
-│ - Action execution                  │
-└─────────────────────────────────────┘
-    │
-    ▼
-Android Device (ADB)
-```
-
-## File Structure
-
-```
-mobile-glm/
-├── agent_sdk.py          # Claude Agent SDK orchestrator
-├── phone_tool.py         # AutoGLM execution layer
-├── preference_tool.py    # User preference tool
-├── scrcpy_ws_bridge.py   # WebSocket H.264 bridge
-├── MobileGLM-iOS/        # iOS remote control app
-└── Open-AutoGLM/         # AutoGLM SDK (clone separately)
-```
-
-## License
+### License
 
 MIT
+
+---
+
+<a name="中文"></a>
+
+## 中文
+
+基于 **Claude Agent SDK** + **AutoGLM-Phone-9B** 的 AI 手机自动化系统。
+
+使用自然语言命令控制 Android 手机，通过智能多代理系统实现。
+
+### 功能特性
+
+- **自然语言控制** - "打开淘宝搜索耳机" → 代理自动处理
+- **Claude 编排** - 任务规划、分解和错误恢复
+- **AutoGLM-Phone-9B** - 智谱 AI 视觉模型，理解和控制手机 UI
+- **卡顿检测** - 7 种启发式自动识别并恢复失败
+- **用户偏好** - 学习您的偏好，实现个性化自动化
+- **iOS 远程查看器**（可选）- 以 ~50-80ms 延迟串流 Android 屏幕
+
+### 快速开始
+
+**前置要求：**
+- Python 3.11+
+- 已启用 USB 调试的 Android 设备
+- [智谱 API 密钥](https://open.bigmodel.cn/)（AutoGLM）
+- [Anthropic API 密钥](https://console.anthropic.com/)（Claude）
+
+**安装：**
+
+```bash
+git clone https://github.com/YOUR-USERNAME/mobile-glm.git
+cd mobile-glm
+uv sync  # 自动从 GitHub 安装 Open-AutoGLM
+```
+
+**配置：**
+
+```bash
+cp .env.example .env
+# 编辑 .env 添加您的 API 密钥
+```
+
+**运行：**
+
+```bash
+adb devices  # 连接 Android 设备
+uv run python agent_sdk.py
+```
+
+**示例命令：**
+- "打开设置"
+- "在美团上搜索餐厅"
+- "打开飞行模式"
+
+### 系统架构
+
+```
+自然语言 → Claude SDK → phone_tool → AutoGLM API → Android (ADB)
+```
+
+**Claude Agent SDK** 规划任务并编排
+**phone_tool.py** 管理执行并进行安全检查
+**AutoGLM-Phone-9B** 分析截图并执行 UI 动作
+
+### iOS 远程查看器（可选）
+
+将 Android 屏幕串流到 iOS 设备：
+
+```bash
+# 1. 下载 scrcpy-server.jar 到项目根目录
+# 2. 启动桥接
+uv run python scrcpy_ws_bridge.py
+
+# 3. 构建 iOS 应用
+open MobileGLM-iOS/MobileGLM.xcodeproj
+```
+
+### API 示例
+
+```python
+from agent_sdk import TelemetryAgentSDK
+
+agent = TelemetryAgentSDK()
+result = agent.invoke("打开设置并启用飞行模式")
+print(result['final_response'])
+```
+
+### 许可证
+
+MIT
+
+---
+
+## Contributing | 贡献
+
+Contributions welcome! | 欢迎贡献！
+
+Please submit issues and pull requests. | 请提交问题和拉取请求。
