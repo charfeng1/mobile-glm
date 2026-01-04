@@ -151,9 +151,19 @@ Stream your Android screen to an iOS device for remote viewing and control.
 3. **Build iOS app**:
    ```bash
    open MobileGLM-iOS/MobileGLM.xcodeproj
-   # Build and run on your iOS device
-   # Enter your computer's IP address in the app
    ```
+
+   In Xcode:
+   - Select your development team (Signing & Capabilities)
+   - Connect your iOS device or select a simulator
+   - Click the Run button (⌘R)
+
+   First-time use:
+   - Enter the IP address of the computer running the bridge
+   - Enter the port (default 8765)
+   - Tap Connect
+
+   Tip: Run `ifconfig | grep "inet "` on Mac to find your local IP address
 
 ### Bridge Protocol
 

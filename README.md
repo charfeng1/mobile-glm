@@ -151,9 +151,19 @@ mobile-glm/
 3. **构建 iOS 应用**：
    ```bash
    open MobileGLM-iOS/MobileGLM.xcodeproj
-   # 在 iOS 设备上构建并运行
-   # 在应用中输入您计算机的 IP 地址
    ```
+
+   在 Xcode 中：
+   - 选择您的开发团队（Signing & Capabilities）
+   - 连接 iOS 设备或选择模拟器
+   - 点击运行按钮（⌘R）
+
+   首次使用：
+   - 在应用中输入运行桥接服务的计算机 IP 地址
+   - 输入端口（默认 8765）
+   - 点击连接
+
+   提示：在 Mac 上运行 `ifconfig | grep "inet "` 查找您的本地 IP 地址
 
 ### 桥接协议
 
