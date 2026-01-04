@@ -1,0 +1,18 @@
+[project]
+name = "mobile-glm"
+version = "0.1.0"
+description = "Phone automation agent using Claude Agent SDK + AutoGLM"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "httpx",
+    "pillow",
+    "claude-agent-sdk>=0.1.18",
+    "numpy>=2.4.0",
+    "openai",
+    "websockets",
+    "adbutils",
+]
+
+[tool.setuptools]
+py-modules = ["agent_sdk", "phone_tool", "preference_tool", "scrcpy_ws_bridge"]

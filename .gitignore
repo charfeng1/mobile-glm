@@ -1,0 +1,32 @@
+# Secrets
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+.venv/
+venv/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cloned dependency repos (clone separately, see README)
+Open-AutoGLM/
+
+# Xcode
+*.xcuserdatad/
+*.xcuserstate
+
+# Local data and experiments
+data/
+agent_workspace/
+*.jar
