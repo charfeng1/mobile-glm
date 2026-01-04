@@ -5,16 +5,16 @@
 
 AI-powered Android phone automation using **Claude Agent SDK** + **AutoGLM-Phone-9B**.
 
-Control your Android phone with natural language commands through an intelligent multi-agent system featuring automatic stuck detection, user preference learning, and optional iOS remote viewing.
+Control your Android phone with natural language commands, featuring iOS remote control, intelligent stuck detection, and user preference learning.
 
 ## Features
 
 - **Natural Language Control** - "Open Taobao and search for headphones" → Agent handles it
 - **Claude Agent SDK Orchestration** - Task planning, decomposition, and error recovery
 - **AutoGLM-Phone-9B** - Zhipu's vision model for phone UI understanding and control
+- **iOS Remote Control** - View Android screen and control via touch on iOS device (~50-80ms latency)
 - **Stuck Detection** - 7 heuristic detectors automatically identify and recover from failures
 - **User Preferences** - Learns and remembers your preferences for personalized automation
-- **iOS Remote Viewer** (Optional) - Stream Android screen to iOS with ~50-80ms latency
 
 ## Quick Start
 
@@ -130,9 +130,38 @@ mobile-glm/
 └── pyproject.toml        # Python dependencies
 ```
 
-## iOS Remote Viewer (Optional)
+## iOS Remote Control
 
-Stream your Android screen to an iOS device for remote viewing and control.
+View and control your Android phone directly from an iOS device with real-time screen streaming and touch control.
+
+### Architecture
+
+```
+iOS Device (View & Touch)
+    │
+    │ WebSocket Connection
+    │ ├─ Receive: H.264 video stream
+    │ └─ Send: Touch events (x, y, action)
+    │
+    ▼
+WebSocket Bridge (scrcpy_ws_bridge.py)
+    │ Runs on your computer
+    │
+    ├─ Video Encoding: Android screen → H.264 → iOS
+    └─ Touch Forwarding: iOS touch → ADB commands → Android
+    │
+    ▼
+Android Device
+    ├─ MediaProjection: Screen capture
+    ├─ MediaCodec: H.264 hardware encoding
+    └─ ADB: Receives and executes touch commands
+```
+
+**Performance Benefits:**
+- iOS VideoToolbox hardware H.264 decoding: ~5ms
+- Metal rendering: ~8ms
+- Touch latency: ~8ms
+- **Total latency: ~50-80ms** (vs ~100-150ms for web-based solutions)
 
 ### Setup
 
