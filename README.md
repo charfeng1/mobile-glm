@@ -1,194 +1,237 @@
 # MobileGLM - AI-Powered Phone Automation
 
-[![en](https://img.shields.io/badge/lang-en-blue.svg)](#english)
-[![zh](https://img.shields.io/badge/lang-zh-red.svg)](#中文)
-
----
-
-<a name="english"></a>
-
-## English
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh-CN.md)
 
 AI-powered Android phone automation using **Claude Agent SDK** + **AutoGLM-Phone-9B**.
 
-Control your Android phone with natural language commands through an intelligent multi-agent system.
+Control your Android phone with natural language commands through an intelligent multi-agent system featuring automatic stuck detection, user preference learning, and optional iOS remote viewing.
 
-### Features
+## Features
 
 - **Natural Language Control** - "Open Taobao and search for headphones" → Agent handles it
-- **Claude Orchestration** - Task planning, decomposition, and error recovery
-- **AutoGLM-Phone-9B** - Zhipu's vision model for phone UI understanding
-- **Stuck Detection** - 7 heuristics automatically identify and recover from failures
-- **User Preferences** - Learns your preferences for personalized automation
-- **iOS Remote Viewer** (Optional) - Stream Android screen with ~50-80ms latency
+- **Claude Agent SDK Orchestration** - Task planning, decomposition, and error recovery
+- **AutoGLM-Phone-9B** - Zhipu's vision model for phone UI understanding and control
+- **Stuck Detection** - 7 heuristic detectors automatically identify and recover from failures
+- **User Preferences** - Learns and remembers your preferences for personalized automation
+- **iOS Remote Viewer** (Optional) - Stream Android screen to iOS with ~50-80ms latency
 
-### Quick Start
+## Quick Start
 
-**Prerequisites:**
-- Python 3.11+
-- Android device with USB debugging
-- [Zhipu API key](https://open.bigmodel.cn/) (AutoGLM)
-- [Anthropic API key](https://console.anthropic.com/) (Claude)
+### Prerequisites
 
-**Installation:**
+- **Python 3.11+**
+- **Android device** with USB debugging enabled
+- **API Keys**:
+  - [Zhipu API key](https://open.bigmodel.cn/) for AutoGLM (required)
+  - [Anthropic API key](https://console.anthropic.com/) for Claude Agent SDK (required)
+
+### Installation
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/mobile-glm.git
+# Clone repository
+git clone https://github.com/charfeng1/mobile-glm.git
 cd mobile-glm
-uv sync  # Auto-installs Open-AutoGLM from GitHub
+
+# Install dependencies (automatically installs Open-AutoGLM from GitHub)
+uv sync
+
+# Or using pip
+pip install -e .
 ```
 
-**Configure:**
+### Configuration
 
 ```bash
+# Copy environment template
 cp .env.example .env
-# Edit .env with your API keys
+
+# Edit .env and add your API keys:
+# ZHIPU_API_KEY=your_zhipu_api_key_here
+# ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ```
 
-**Run:**
+**Note:** You don't need to use Claude's cloud models! The system works with any Anthropic-compatible API. For example, you can use Zhipu's GLM models through their Anthropic-compatible endpoint by setting:
 
 ```bash
-adb devices  # Connect Android device
+ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
+ANTHROPIC_DEFAULT_HAIKU_MODEL=glm-4.7
+```
+
+This allows you to use local or alternative models while keeping the same interface.
+
+### Connect Android Device
+
+```bash
+# Connect via USB and enable USB debugging
+adb devices
+
+# You should see your device listed
+```
+
+### Run Agent
+
+```bash
+# Start the interactive agent CLI
 uv run python agent_sdk.py
+
+# Example commands:
+# - "Open Settings"
+# - "Search for restaurants on Meituan"
+# - "Turn on airplane mode"
 ```
 
-**Example commands:**
-- "Open Settings"
-- "Search for restaurants on Meituan"
-- "Turn on airplane mode"
-
-### Architecture
+## Architecture
 
 ```
-Natural Language → Claude SDK → phone_tool → AutoGLM API → Android (ADB)
+User Command ("Open Taobao and search for headphones")
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│ Claude Agent SDK (Orchestrator)         │
+│ • Understands natural language          │
+│ • Plans multi-step tasks                │
+│ • Calls phone_task tool                 │
+│ • Handles errors and retries            │
+└─────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│ phone_tool.py (Execution Layer)         │
+│ • Step limiting & safety checks         │
+│ • Action/app allowlists                 │
+│ • 7 stuck detection heuristics          │
+│ • Session management                    │
+└─────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────┐
+│ AutoGLM-Phone-9B API (Vision Model)     │
+│ • Screenshot analysis                   │
+│ • UI element recognition                │
+│ • Action planning & execution           │
+└─────────────────────────────────────────┘
+    │
+    ▼
+Android Device (via ADB)
 ```
 
-**Claude Agent SDK** plans tasks and orchestrates
-**phone_tool.py** manages execution with safety checks
-**AutoGLM-Phone-9B** analyzes screenshots and executes UI actions
+## Project Structure
 
-### iOS Remote Viewer (Optional)
-
-Stream Android screen to iOS device:
-
-```bash
-# 1. Download scrcpy-server.jar to project root
-# 2. Start bridge
-uv run python scrcpy_ws_bridge.py
-
-# 3. Build iOS app
-open MobileGLM-iOS/MobileGLM.xcodeproj
+```
+mobile-glm/
+├── agent_sdk.py          # Claude Agent SDK orchestrator
+├── phone_tool.py         # AutoGLM execution wrapper
+├── preference_tool.py    # User preference storage
+├── scrcpy_ws_bridge.py   # WebSocket H.264 bridge (for iOS viewer)
+├── security/             # Prompt injection defense & image filtering
+├── MobileGLM-iOS/        # iOS remote viewer app
+├── .env.example          # Environment template
+└── pyproject.toml        # Python dependencies
 ```
 
-### API Example
+## iOS Remote Viewer (Optional)
+
+Stream your Android screen to an iOS device for remote viewing and control.
+
+### Setup
+
+1. **Download scrcpy-server** (one-time setup):
+   ```bash
+   # Download from https://github.com/Genymobile/scrcpy/releases
+   # Place scrcpy-server.jar in project root
+   ```
+
+2. **Start WebSocket bridge**:
+   ```bash
+   uv run python scrcpy_ws_bridge.py
+   # Server runs on ws://0.0.0.0:8765
+   ```
+
+3. **Build iOS app**:
+   ```bash
+   open MobileGLM-iOS/MobileGLM.xcodeproj
+   # Build and run on your iOS device
+   # Enter your computer's IP address in the app
+   ```
+
+### Bridge Protocol
+
+- **Video Stream**: H.264 NAL units over WebSocket
+- **Control**: JSON commands for touch/gestures
+  ```json
+  {"type": "touch", "action": "down", "x": 0.5, "y": 0.5}
+  {"type": "home"}
+  {"type": "back"}
+  ```
+
+## API Usage
+
+### High-level Agent API
 
 ```python
 from agent_sdk import TelemetryAgentSDK
 
+# Initialize agent
 agent = TelemetryAgentSDK()
-result = agent.invoke("Open Settings and enable airplane mode")
+
+# Execute task with natural language
+result = agent.invoke("Open Settings and turn on airplane mode")
+
 print(result['final_response'])
 ```
 
-### License
-
-MIT
-
----
-
-<a name="中文"></a>
-
-## 中文
-
-基于 **Claude Agent SDK** + **AutoGLM-Phone-9B** 的 AI 手机自动化系统。
-
-使用自然语言命令控制 Android 手机，通过智能多代理系统实现。
-
-### 功能特性
-
-- **自然语言控制** - "打开淘宝搜索耳机" → 代理自动处理
-- **Claude 编排** - 任务规划、分解和错误恢复
-- **AutoGLM-Phone-9B** - 智谱 AI 视觉模型，理解和控制手机 UI
-- **卡顿检测** - 7 种启发式自动识别并恢复失败
-- **用户偏好** - 学习您的偏好，实现个性化自动化
-- **iOS 远程查看器**（可选）- 以 ~50-80ms 延迟串流 Android 屏幕
-
-### 快速开始
-
-**前置要求：**
-- Python 3.11+
-- 已启用 USB 调试的 Android 设备
-- [智谱 API 密钥](https://open.bigmodel.cn/)（AutoGLM）
-- [Anthropic API 密钥](https://console.anthropic.com/)（Claude）
-
-**安装：**
-
-```bash
-git clone https://github.com/YOUR-USERNAME/mobile-glm.git
-cd mobile-glm
-uv sync  # 自动从 GitHub 安装 Open-AutoGLM
-```
-
-**配置：**
-
-```bash
-cp .env.example .env
-# 编辑 .env 添加您的 API 密钥
-```
-
-**运行：**
-
-```bash
-adb devices  # 连接 Android 设备
-uv run python agent_sdk.py
-```
-
-**示例命令：**
-- "打开设置"
-- "在美团上搜索餐厅"
-- "打开飞行模式"
-
-### 系统架构
-
-```
-自然语言 → Claude SDK → phone_tool → AutoGLM API → Android (ADB)
-```
-
-**Claude Agent SDK** 规划任务并编排
-**phone_tool.py** 管理执行并进行安全检查
-**AutoGLM-Phone-9B** 分析截图并执行 UI 动作
-
-### iOS 远程查看器（可选）
-
-将 Android 屏幕串流到 iOS 设备：
-
-```bash
-# 1. 下载 scrcpy-server.jar 到项目根目录
-# 2. 启动桥接
-uv run python scrcpy_ws_bridge.py
-
-# 3. 构建 iOS 应用
-open MobileGLM-iOS/MobileGLM.xcodeproj
-```
-
-### API 示例
+### Direct phone_task API
 
 ```python
-from agent_sdk import TelemetryAgentSDK
+from phone_tool import phone_task
 
-agent = TelemetryAgentSDK()
-result = agent.invoke("打开设置并启用飞行模式")
-print(result['final_response'])
+# Execute single task
+result = phone_task(
+    goal="Open the Settings app",
+    max_steps=5,
+)
+
+print(result)  # JSON with status, steps_taken, etc.
 ```
 
-### 许可证
+## Stuck Detection
+
+The system automatically detects when the phone agent gets stuck:
+
+- **Repeated failed app launches** (2+ failures)
+- **Repetitive actions** (same action 4+ times in last 5 steps)
+- **Too many steps** (15+ steps without completion)
+- **Infinite loops** (same screen state repeating)
+
+When stuck, the system returns guidance requests to the orchestrator for recovery.
+
+## Security Features
+
+- **Prompt injection defense** - Detects and blocks malicious instructions in screenshots
+- **Image filtering** - Preprocesses screenshots to remove low-contrast injection attempts
+- **Sensitive screen detection** - Automatically stops on login/payment screens
+- **Action allowlists** - Restrict which actions can be executed
+- **App allowlists** - Restrict which apps can be launched
+
+## Requirements
+
+- Python 3.11+
+- Android device with ADB
+- [uv](https://github.com/astral-sh/uv) or pip
+- Zhipu API key (for AutoGLM)
+- Anthropic API key (for Claude)
+
+## License
 
 MIT
 
----
+## Acknowledgments
 
-## Contributing | 贡献
+- Built with [Claude Agent SDK](https://github.com/anthropics/agent-sdk-python)
+- Powered by [AutoGLM-Phone-9B](https://open.bigmodel.cn/) from Zhipu AI
+- Uses [Open-AutoGLM](https://github.com/zai-org/Open-AutoGLM) SDK
 
-Contributions welcome! | 欢迎贡献！
+## Contributing
 
-Please submit issues and pull requests. | 请提交问题和拉取请求。
+Contributions welcome! Please feel free to submit issues and pull requests.
