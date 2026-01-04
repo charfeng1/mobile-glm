@@ -1,237 +1,237 @@
-# MobileGLM - AI-Powered Phone Automation
+# MobileGLM - AI 手机自动化系统
 
-[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.md)
-[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.zh-CN.md)
+[![zh](https://img.shields.io/badge/lang-zh-red.svg)](README.md)
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](README.en.md)
 
-AI-powered Android phone automation using **Claude Agent SDK** + **AutoGLM-Phone-9B**.
+基于 **Claude Agent SDK** + **AutoGLM-Phone-9B** 的 AI 手机自动化系统。
 
-Control your Android phone with natural language commands through an intelligent multi-agent system featuring automatic stuck detection, user preference learning, and optional iOS remote viewing.
+使用自然语言命令控制 Android 手机，通过智能多代理系统实现自动卡顿检测、用户偏好学习和可选的 iOS 远程查看功能。
 
-## Features
+## 功能特性
 
-- **Natural Language Control** - "Open Taobao and search for headphones" → Agent handles it
-- **Claude Agent SDK Orchestration** - Task planning, decomposition, and error recovery
-- **AutoGLM-Phone-9B** - Zhipu's vision model for phone UI understanding and control
-- **Stuck Detection** - 7 heuristic detectors automatically identify and recover from failures
-- **User Preferences** - Learns and remembers your preferences for personalized automation
-- **iOS Remote Viewer** (Optional) - Stream Android screen to iOS with ~50-80ms latency
+- **自然语言控制** - "打开淘宝搜索耳机" → 代理自动处理
+- **Claude Agent SDK 编排** - 任务规划、分解和错误恢复
+- **AutoGLM-Phone-9B** - 智谱 AI 的视觉模型，理解和控制手机 UI
+- **卡顿检测** - 7 种启发式检测器自动识别并恢复失败
+- **用户偏好** - 学习并记住您的偏好，实现个性化自动化
+- **iOS 远程查看器**（可选）- 以 ~50-80ms 延迟将 Android 屏幕串流到 iOS
 
-## Quick Start
+## 快速开始
 
-### Prerequisites
+### 前置要求
 
 - **Python 3.11+**
-- **Android device** with USB debugging enabled
-- **API Keys**:
-  - [Zhipu API key](https://open.bigmodel.cn/) for AutoGLM (required)
-  - [Anthropic API key](https://console.anthropic.com/) for Claude Agent SDK (required)
+- **Android 设备**，已启用 USB 调试
+- **API 密钥**:
+  - [智谱 API 密钥](https://open.bigmodel.cn/) 用于 AutoGLM（必需）
+  - [Anthropic API 密钥](https://console.anthropic.com/) 用于 Claude Agent SDK（必需）
 
-### Installation
+### 安装
 
 ```bash
-# Clone repository
+# 克隆仓库
 git clone https://github.com/charfeng1/mobile-glm.git
 cd mobile-glm
 
-# Install dependencies (automatically installs Open-AutoGLM from GitHub)
+# 安装依赖（自动从 GitHub 安装 Open-AutoGLM）
 uv sync
 
-# Or using pip
+# 或使用 pip
 pip install -e .
 ```
 
-### Configuration
+### 配置
 
 ```bash
-# Copy environment template
+# 复制环境变量模板
 cp .env.example .env
 
-# Edit .env and add your API keys:
-# ZHIPU_API_KEY=your_zhipu_api_key_here
-# ANTHROPIC_API_KEY=your_anthropic_api_key_here
+# 编辑 .env 并添加您的 API 密钥：
+# ZHIPU_API_KEY=您的智谱API密钥
+# ANTHROPIC_API_KEY=您的Anthropic API密钥
 ```
 
-**Note:** You don't need to use Claude's cloud models! The system works with any Anthropic-compatible API. For example, you can use Zhipu's GLM models through their Anthropic-compatible endpoint by setting:
+**注意：** 您不需要使用 Claude 的云端模型！系统支持任何 Anthropic 兼容的 API。例如，您可以通过设置以下变量来使用智谱的 GLM 模型：
 
 ```bash
 ANTHROPIC_BASE_URL=https://api.z.ai/api/anthropic
 ANTHROPIC_DEFAULT_HAIKU_MODEL=glm-4.7
 ```
 
-This allows you to use local or alternative models while keeping the same interface.
+这样您可以使用本地或其他替代模型，同时保持相同的接口。
 
-### Connect Android Device
+### 连接 Android 设备
 
 ```bash
-# Connect via USB and enable USB debugging
+# 通过 USB 连接并启用 USB 调试
 adb devices
 
-# You should see your device listed
+# 您应该看到设备已列出
 ```
 
-### Run Agent
+### 运行代理
 
 ```bash
-# Start the interactive agent CLI
+# 启动交互式代理 CLI
 uv run python agent_sdk.py
 
-# Example commands:
-# - "Open Settings"
-# - "Search for restaurants on Meituan"
-# - "Turn on airplane mode"
+# 示例命令：
+# - "打开设置"
+# - "在美团上搜索餐厅"
+# - "打开飞行模式"
 ```
 
-## Architecture
+## 系统架构
 
 ```
-User Command ("Open Taobao and search for headphones")
+用户指令（"打开淘宝搜索耳机"）
     │
     ▼
 ┌─────────────────────────────────────────┐
-│ Claude Agent SDK (Orchestrator)         │
-│ • Understands natural language          │
-│ • Plans multi-step tasks                │
-│ • Calls phone_task tool                 │
-│ • Handles errors and retries            │
+│ Claude Agent SDK（编排器）               │
+│ • 理解自然语言                          │
+│ • 规划多步骤任务                        │
+│ • 调用 phone_task 工具                  │
+│ • 处理错误和重试                        │
 └─────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────┐
-│ phone_tool.py (Execution Layer)         │
-│ • Step limiting & safety checks         │
-│ • Action/app allowlists                 │
-│ • 7 stuck detection heuristics          │
-│ • Session management                    │
+│ phone_tool.py（执行层）                  │
+│ • 步数限制和安全检查                    │
+│ • 动作/应用白名单                       │
+│ • 7 种卡顿检测启发式                    │
+│ • 会话管理                              │
 └─────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────┐
-│ AutoGLM-Phone-9B API (Vision Model)     │
-│ • Screenshot analysis                   │
-│ • UI element recognition                │
-│ • Action planning & execution           │
+│ AutoGLM-Phone-9B API（视觉模型）         │
+│ • 截图分析                              │
+│ • UI 元素识别                           │
+│ • 动作规划和执行                        │
 └─────────────────────────────────────────┘
     │
     ▼
-Android Device (via ADB)
+Android 设备（通过 ADB）
 ```
 
-## Project Structure
+## 项目结构
 
 ```
 mobile-glm/
-├── agent_sdk.py          # Claude Agent SDK orchestrator
-├── phone_tool.py         # AutoGLM execution wrapper
-├── preference_tool.py    # User preference storage
-├── scrcpy_ws_bridge.py   # WebSocket H.264 bridge (for iOS viewer)
-├── security/             # Prompt injection defense & image filtering
-├── MobileGLM-iOS/        # iOS remote viewer app
-├── .env.example          # Environment template
-└── pyproject.toml        # Python dependencies
+├── agent_sdk.py          # Claude Agent SDK 编排器
+├── phone_tool.py         # AutoGLM 执行包装器
+├── preference_tool.py    # 用户偏好存储
+├── scrcpy_ws_bridge.py   # WebSocket H.264 桥接（用于 iOS 查看器）
+├── security/             # 提示注入防御和图像过滤
+├── MobileGLM-iOS/        # iOS 远程查看器应用
+├── .env.example          # 环境变量模板
+└── pyproject.toml        # Python 依赖
 ```
 
-## iOS Remote Viewer (Optional)
+## iOS 远程查看器（可选）
 
-Stream your Android screen to an iOS device for remote viewing and control.
+将 Android 屏幕串流到 iOS 设备以进行远程查看和控制。
 
-### Setup
+### 设置
 
-1. **Download scrcpy-server** (one-time setup):
+1. **下载 scrcpy-server**（一次性设置）：
    ```bash
-   # Download from https://github.com/Genymobile/scrcpy/releases
-   # Place scrcpy-server.jar in project root
+   # 从 https://github.com/Genymobile/scrcpy/releases 下载
+   # 将 scrcpy-server.jar 放在项目根目录
    ```
 
-2. **Start WebSocket bridge**:
+2. **启动 WebSocket 桥接**：
    ```bash
    uv run python scrcpy_ws_bridge.py
-   # Server runs on ws://0.0.0.0:8765
+   # 服务器运行在 ws://0.0.0.0:8765
    ```
 
-3. **Build iOS app**:
+3. **构建 iOS 应用**：
    ```bash
    open MobileGLM-iOS/MobileGLM.xcodeproj
-   # Build and run on your iOS device
-   # Enter your computer's IP address in the app
+   # 在 iOS 设备上构建并运行
+   # 在应用中输入您计算机的 IP 地址
    ```
 
-### Bridge Protocol
+### 桥接协议
 
-- **Video Stream**: H.264 NAL units over WebSocket
-- **Control**: JSON commands for touch/gestures
+- **视频流**: 通过 WebSocket 传输 H.264 NAL 单元
+- **控制命令**: 触摸/手势的 JSON 命令
   ```json
   {"type": "touch", "action": "down", "x": 0.5, "y": 0.5}
   {"type": "home"}
   {"type": "back"}
   ```
 
-## API Usage
+## API 使用
 
-### High-level Agent API
+### 高级代理 API
 
 ```python
 from agent_sdk import TelemetryAgentSDK
 
-# Initialize agent
+# 初始化代理
 agent = TelemetryAgentSDK()
 
-# Execute task with natural language
-result = agent.invoke("Open Settings and turn on airplane mode")
+# 使用自然语言执行任务
+result = agent.invoke("打开设置并开启飞行模式")
 
 print(result['final_response'])
 ```
 
-### Direct phone_task API
+### 直接使用 phone_task API
 
 ```python
 from phone_tool import phone_task
 
-# Execute single task
+# 执行单个任务
 result = phone_task(
-    goal="Open the Settings app",
+    goal="打开设置应用",
     max_steps=5,
 )
 
-print(result)  # JSON with status, steps_taken, etc.
+print(result)  # 包含 status、steps_taken 等的 JSON
 ```
 
-## Stuck Detection
+## 卡顿检测
 
-The system automatically detects when the phone agent gets stuck:
+系统自动检测手机代理何时卡顿：
 
-- **Repeated failed app launches** (2+ failures)
-- **Repetitive actions** (same action 4+ times in last 5 steps)
-- **Too many steps** (15+ steps without completion)
-- **Infinite loops** (same screen state repeating)
+- **重复失败的应用启动**（2+ 次失败）
+- **重复性动作**（最近 5 步中同一动作 4+ 次）
+- **步数过多**（15+ 步未完成）
+- **无限循环**（相同屏幕状态重复）
 
-When stuck, the system returns guidance requests to the orchestrator for recovery.
+卡顿时，系统会向编排器返回指导请求以进行恢复。
 
-## Security Features
+## 安全功能
 
-- **Prompt injection defense** - Detects and blocks malicious instructions in screenshots
-- **Image filtering** - Preprocesses screenshots to remove low-contrast injection attempts
-- **Sensitive screen detection** - Automatically stops on login/payment screens
-- **Action allowlists** - Restrict which actions can be executed
-- **App allowlists** - Restrict which apps can be launched
+- **提示注入防御** - 检测并阻止截图中的恶意指令
+- **图像过滤** - 预处理截图以移除低对比度注入尝试
+- **敏感屏幕检测** - 在登录/支付屏幕上自动停止
+- **动作白名单** - 限制可执行的动作
+- **应用白名单** - 限制可启动的应用
 
-## Requirements
+## 系统要求
 
 - Python 3.11+
-- Android device with ADB
-- [uv](https://github.com/astral-sh/uv) or pip
-- Zhipu API key (for AutoGLM)
-- Anthropic API key (for Claude)
+- 带 ADB 的 Android 设备
+- [uv](https://github.com/astral-sh/uv) 或 pip
+- 智谱 API 密钥（用于 AutoGLM）
+- Anthropic API 密钥（用于 Claude）
 
-## License
+## 许可证
 
 MIT
 
-## Acknowledgments
+## 致谢
 
-- Built with [Claude Agent SDK](https://github.com/anthropics/agent-sdk-python)
-- Powered by [AutoGLM-Phone-9B](https://open.bigmodel.cn/) from Zhipu AI
-- Uses [Open-AutoGLM](https://github.com/zai-org/Open-AutoGLM) SDK
+- 使用 [Claude Agent SDK](https://github.com/anthropics/agent-sdk-python) 构建
+- 由智谱 AI 的 [AutoGLM-Phone-9B](https://open.bigmodel.cn/) 提供支持
+- 使用 [Open-AutoGLM](https://github.com/zai-org/Open-AutoGLM) SDK
 
-## Contributing
+## 贡献
 
-Contributions welcome! Please feel free to submit issues and pull requests.
+欢迎贡献！请随时提交问题和拉取请求。
